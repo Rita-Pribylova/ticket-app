@@ -12,7 +12,6 @@ body {
   padding: 20px;
 }
 
-/* Шапка и Админ-панель */
 .app-header {
   display: flex;
   justify-content: space-between;
@@ -61,7 +60,6 @@ body {
   border-radius: 4px;
 }
 
-/* Ошибки */
 .error-banner {
   background: #fed7d7;
   border: 1px solid #f56565;
@@ -71,7 +69,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* Сетка (Форма слева, Таблица справа) */
 .main-layout {
   display: grid;
   grid-template-columns: 1fr 3fr;
@@ -84,7 +81,6 @@ body {
   }
 }
 
-/* Форма создания */
 .form-card {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -125,7 +121,6 @@ body {
   cursor: pointer;
 }
 
-/* Фильтры и Поиск */
 .toolbar {
   background: #edf2f7;
   padding: 12px;
@@ -177,7 +172,6 @@ body {
   background: white;
 }
 
-/* Таблица */
 .tickets-table {
   width: 100%;
   border-collapse: collapse;
@@ -208,7 +202,6 @@ body {
   color: #a0aec0;
 }
 
-/* Приоритеты (Теги) */
 .badge-priority {
   padding: 4px 8px;
   border-radius: 4px;
@@ -228,7 +221,6 @@ body {
   color: #4a5568;
 }
 
-/* Кнопка удаления */
 .btn-delete {
   padding: 6px 10px;
   color: white;
@@ -237,7 +229,6 @@ body {
   cursor: pointer;
 }
 
-/* Пагинация */
 .pagination-panel {
   display: flex;
   justify-content: space-between;
@@ -267,4 +258,26 @@ body {
   text-align: center;
   padding: 30px;
   color: #718096;
+}
+
+.ticket-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: #718096;
+}
+
+.date-item {
+  background: #edf2f7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.date-item strong {
+  color: #4a5568;
+  margin-right: 4px;
 }

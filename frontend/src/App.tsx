@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Trash2, Shield, ShieldAlert, Search, PlusCircle } from 'lucide-react';
-import './styles.css';
+import React, { useState, useEffect } from "react";
+import { Trash2, Shield, ShieldAlert, Search, PlusCircle } from "lucide-react";
+import "./styles.css";
 
-type TicketStatus = 'new' | 'in_progress' | 'done';
-type TicketPriority = 'low' | 'normal' | 'high';
+type TicketStatus = "new" | "in_progress" | "done";
+type TicketPriority = "low" | "normal" | "high";
 
 interface Ticket {
   id: number;
@@ -22,7 +22,7 @@ interface PaginatedResponse {
   items: Ticket[];
 }
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = "http://localhost:8000/api";
 
 export default function App() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -30,21 +30,21 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [priorityFilter, setPriorityFilter] = useState<string>('');
-  const [sortBy, setSortBy] = useState('created_at');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [priorityFilter, setPriorityFilter] = useState<string>("");
+  const [sortBy, setSortBy] = useState("created_at");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [page, setPage] = useState(1);
-  const size = 5; 
+  const size = 5;
 
-  const [newTitle, setNewTitle] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [newPriority, setNewPriority] = useState<TicketPriority>('normal');
+  const [newTitle, setNewTitle] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newPriority, setNewPriority] = useState<TicketPriority>("normal");
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const [adminUsername, setAdminUsername] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [authHeader, setAuthHeader] = useState<string | null>(null);
 
   const fetchTickets = async () => {
@@ -57,18 +57,18 @@ export default function App() {
         sort_by: sortBy,
         sort_order: sortOrder,
       });
-      if (search) params.append('search', search);
-      if (statusFilter) params.append('status', statusFilter);
-      if (priorityFilter) params.append('priority', priorityFilter);
+      if (search) params.append("search", search);
+      if (statusFilter) params.append("status", statusFilter);
+      if (priorityFilter) params.append("priority", priorityFilter);
 
       const response = await fetch(`${API_BASE}/tickets?${params.toString()}`);
-      if (!response.ok) throw new Error('Ошибка при загрузке данных с сервера');
-      
+      if (!response.ok) throw new Error("Ошибка при загрузке данных с сервера");
+
       const data: PaginatedResponse = await response.json();
       setTickets(data.items);
       setTotal(data.total);
     } catch (err: any) {
-      setApiError(err.message || 'Неизвестная ошибка API');
+      setApiError(err.message || "Неизвестная ошибка API");
     } finally {
       setLoading(false);
     }
@@ -78,19 +78,19 @@ export default function App() {
     fetchTickets();
   }, [page, statusFilter, priorityFilter, sortBy, sortOrder]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
     setPage(1);
     fetchTickets();
   };
 
-  const handleCreateTicket = async (e: React.FormEvent) => {
+  const handleCreateTicket = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
     setApiError(null);
     try {
       const response = await fetch(`${API_BASE}/tickets`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newTitle,
           description: newDescription || null,
@@ -99,29 +99,30 @@ export default function App() {
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.detail || 'Не удалось создать заявку');
+      if (!response.ok)
+        throw new Error(result.detail || "Не удалось создать заявку");
 
-      setNewTitle('');
-      setNewDescription('');
-      setNewPriority('normal');
+      setNewTitle("");
+      setNewDescription("");
+      setNewPriority("normal");
       setPage(1);
       fetchTickets();
     } catch (err: any) {
       setApiError(err.message);
     }
   };
-
   const handleStatusChange = async (id: number, newStatus: TicketStatus) => {
     setApiError(null);
     try {
       const response = await fetch(`${API_BASE}/tickets/${id}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.detail || 'Ошибка обновления статуса');
+      if (!response.ok)
+        throw new Error(result.detail || "Ошибка обновления статуса");
 
       fetchTickets();
     } catch (err: any) {
@@ -131,19 +132,21 @@ export default function App() {
 
   const handleDeleteTicket = async (id: number) => {
     if (!authHeader) {
-      setApiError('Только администратор может удалять заявки');
+      setApiError("Только администратор может удалять заявки");
       return;
     }
     setApiError(null);
     try {
       const response = await fetch(`${API_BASE}/tickets/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': authHeader },
+        method: "DELETE",
+        headers: { Authorization: authHeader },
       });
 
       if (!response.ok) {
-        const result = await response.json().catch(() => ({ detail: 'Ошибка удаления' }));
-        throw new Error(result.detail || 'Не удалось удалить заявку');
+        const result = await response
+          .json()
+          .catch(() => ({ detail: "Ошибка удаления" }));
+        throw new Error(result.detail || "Не удалось удалить заявку");
       }
 
       fetchTickets();
@@ -152,19 +155,20 @@ export default function App() {
     }
   };
 
-  const handleAdminLogin = async (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.BaseSyntheticEvent) => {
     e.preventDefault();
     setApiError(null);
-    const token = 'Basic ' + btoa(`${adminUsername}:${adminPassword}`);
+    const token = "Basic " + btoa(`${adminUsername}:${adminPassword}`);
     try {
       const response = await fetch(`${API_BASE}/admin/verify`, {
-        headers: { 'Authorization': token },
+        headers: { Authorization: token },
       });
-      if (!response.ok) throw new Error('Неверные учетные данные администратора');
-      
+      if (!response.ok)
+        throw new Error("Неверные учетные данные администратора");
+
       setAuthHeader(token);
       setIsAdmin(true);
-      setAdminPassword('');
+      setAdminPassword("");
     } catch (err: any) {
       setApiError(err.message);
     }
@@ -173,18 +177,17 @@ export default function App() {
   const handleAdminLogout = () => {
     setIsAdmin(false);
     setAuthHeader(null);
-    setAdminUsername('');
+    setAdminUsername("");
   };
 
   const totalPages = Math.ceil(total / size);
 
   const getPriorityClass = (priority: TicketPriority) => {
-    if (priority === 'high') return 'badge-priority priority-high';
-    if (priority === 'normal') return 'badge-priority priority-normal';
-    return 'badge-priority priority-low';
+    if (priority === "high") return "badge-priority priority-high";
+    if (priority === "normal") return "badge-priority priority-normal";
+    return "badge-priority priority-low";
   };
-
-    return (
+  return (
     <div className="app-container">
       <header className="app-header">
         <h2>Учёт внутренних заявок</h2>
@@ -192,13 +195,29 @@ export default function App() {
           {isAdmin ? (
             <div className="admin-status-active">
               <Shield size={18} /> Режим: Администратор
-              <button onClick={handleAdminLogout} className="btn-logout">Выйти</button>
+              <button onClick={handleAdminLogout} className="btn-logout">
+                Выйти
+              </button>
             </div>
           ) : (
             <form onSubmit={handleAdminLogin} className="admin-login-form">
-              <span><ShieldAlert size={16} /> Админ-панель:</span>
-              <input type="text" placeholder="Логин" value={adminUsername} onChange={e => setAdminUsername(e.target.value)} required />
-              <input type="password" placeholder="Пароль" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} required />
+              <span>
+                <ShieldAlert size={16} /> Админ-панель:
+              </span>
+              <input
+                type="text"
+                placeholder="Логин"
+                value={adminUsername}
+                onChange={(e) => setAdminUsername(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Пароль"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                required
+              />
               <button type="submit">Войти</button>
             </form>
           )}
@@ -212,45 +231,85 @@ export default function App() {
       )}
 
       <div className="main-layout">
-        {/* ЛЕВАЯ КОЛОНКА: Форма создания заявки */}
         <div>
           <div className="form-card">
-            <h4 style={{ marginTop: 0, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <h4
+              style={{
+                marginTop: 0,
+                marginBottom: "12px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
               <PlusCircle size={18} /> Создать заявку
             </h4>
             <form onSubmit={handleCreateTicket}>
               <div className="form-group">
                 <label>Название *</label>
-                <input type="text" value={newTitle} onChange={e => setNewTitle(e.target.value)} minLength={3} maxLength={120} required placeholder="От 3 до 120 символов" />
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  minLength={3}
+                  maxLength={120}
+                  required
+                  placeholder="От 3 до 120 символов"
+                />
               </div>
               <div className="form-group">
                 <label>Описание</label>
-                <textarea value={newDescription} onChange={e => setNewDescription(e.target.value)} maxLength={1000} rows={3} placeholder="До 1000 символов" />
+                <textarea
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  maxLength={1000}
+                  rows={3}
+                  placeholder="До 1000 символов"
+                />
               </div>
               <div className="form-group">
                 <label>Приоритет</label>
-                <select value={newPriority} onChange={e => setNewPriority(e.target.value as TicketPriority)}>
+                <select
+                  value={newPriority}
+                  onChange={(e) =>
+                    setNewPriority(e.target.value as TicketPriority)
+                  }
+                >
                   <option value="low">Низкий (Low)</option>
                   <option value="normal">Обычный (Normal)</option>
                   <option value="high">Высокий (High)</option>
                 </select>
               </div>
-              <button type="submit" className="btn-submit">Отправить заявку</button>
+              <button type="submit" className="btn-submit">
+                Отправить заявку
+              </button>
             </form>
           </div>
         </div>
 
-        {/* ПРАВАЯ КОЛОНКА: Панель фильтров и Таблица */}
         <div>
           <div className="toolbar">
             <form onSubmit={handleSearchSubmit} className="search-form">
-              <input type="text" placeholder="Поиск по тексту..." value={search} onChange={e => setSearch(e.target.value)} />
-              <button type="submit" className="btn-search"><Search size={14} /></button>
+              <input
+                type="text"
+                placeholder="Поиск по тексту..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <button type="submit" className="btn-search">
+                <Search size={14} />
+              </button>
             </form>
-            
+
             <div className="filter-group">
               <label>Статус</label>
-              <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
                 <option value="">Все</option>
                 <option value="new">New</option>
                 <option value="in_progress">In Progress</option>
@@ -260,7 +319,13 @@ export default function App() {
 
             <div className="filter-group">
               <label>Приоритет</label>
-              <select value={priorityFilter} onChange={e => { setPriorityFilter(e.target.value); setPage(1); }}>
+              <select
+                value={priorityFilter}
+                onChange={(e) => {
+                  setPriorityFilter(e.target.value);
+                  setPage(1);
+                }}
+              >
                 <option value="">Все</option>
                 <option value="low">Low</option>
                 <option value="normal">Normal</option>
@@ -270,7 +335,10 @@ export default function App() {
 
             <div className="filter-group">
               <label>Сортировка</label>
-              <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
                 <option value="created_at">Дате создания</option>
                 <option value="priority">Приоритету</option>
               </select>
@@ -278,7 +346,10 @@ export default function App() {
 
             <div className="filter-group">
               <label>Порядок</label>
-              <select value={sortOrder} onChange={e => setSortOrder(e.target.value)}>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+              >
                 <option value="desc">Убывание</option>
                 <option value="asc">Возрастание</option>
               </select>
@@ -288,7 +359,12 @@ export default function App() {
           {loading ? (
             <div className="info-text">Загрузка списка заявок...</div>
           ) : tickets.length === 0 ? (
-            <div className="info-text" style={{ border: '2px dashed #cbd5e0', borderRadius: '8px' }}>Заявки не найдены.</div>
+            <div
+              className="info-text"
+              style={{ border: "2px dashed #cbd5e0", borderRadius: "8px" }}
+            >
+              Заявки не найдены.
+            </div>
           ) : (
             <div>
               <table className="tickets-table">
@@ -302,14 +378,42 @@ export default function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tickets.map(ticket => (
-                    <tr key={ticket.id} className={ticket.status === 'done' ? 'row-done' : ''}>
-                      <td style={{ fontWeight: 'bold' }}>#{ticket.id}</td>
+                  {tickets.map((ticket) => (
+                    <tr
+                      key={ticket.id}
+                      className={ticket.status === "done" ? "row-done" : ""}
+                    >
+                      <td style={{ fontWeight: "bold" }}>#{ticket.id}</td>
                       <td>
-                        <div className={ticket.status === 'done' ? 'ticket-title-done' : ''} style={{ fontWeight: 'bold' }}>
+                        <div
+                          className={
+                            ticket.status === "done" ? "ticket-title-done" : ""
+                          }
+                          style={{ fontWeight: "bold" }}
+                        >
                           {ticket.title}
                         </div>
-                        {ticket.description && <div style={{ fontSize: '12px', color: '#4a5568', marginTop: '2px' }}>{ticket.description}</div>}
+                        {ticket.description && (
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#4a5568",
+                              marginTop: "2px",
+                            }}
+                          >
+                            {ticket.description}
+                          </div>
+                        )}
+                        <div className="ticket-dates">
+                          <span className="date-item">
+                            <strong>Создано:</strong>{" "}
+                            {new Date(ticket.created_at).toLocaleString()}
+                          </span>
+                          <span className="date-item">
+                            <strong>Изменено:</strong>{" "}
+                            {new Date(ticket.updated_at).toLocaleString()}
+                          </span>
+                        </div>
                       </td>
                       <td>
                         <span className={getPriorityClass(ticket.priority)}>
@@ -317,10 +421,15 @@ export default function App() {
                         </span>
                       </td>
                       <td>
-                        <select 
-                          value={ticket.status} 
-                          disabled={ticket.status === 'done'} 
-                          onChange={(e) => handleStatusChange(ticket.id, e.target.value as TicketStatus)}
+                        <select
+                          value={ticket.status}
+                          disabled={ticket.status === "done"}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              ticket.id,
+                              e.target.value as TicketStatus,
+                            )
+                          }
                         >
                           <option value="new">New</option>
                           <option value="in_progress">In Progress</option>
@@ -328,11 +437,16 @@ export default function App() {
                         </select>
                       </td>
                       <td>
-                        <button 
+                        <button
                           onClick={() => handleDeleteTicket(ticket.id)}
-                          disabled={!isAdmin || ticket.status === 'done'}
+                          disabled={!isAdmin || ticket.status === "done"}
                           className="btn-delete"
-                          style={{ background: (isAdmin && ticket.status !== 'done') ? '#e53e3e' : '#cbd5e0' }}
+                          style={{
+                            background:
+                              isAdmin && ticket.status !== "done"
+                                ? "#e53e3e"
+                                : "#cbd5e0",
+                          }}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -343,11 +457,25 @@ export default function App() {
               </table>
 
               <div className="pagination-panel">
-                <span style={{ fontSize: '13px' }}>Всего элементов: <strong>{total}</strong></span>
+                <span style={{ fontSize: "13px" }}>
+                  Всего элементов: <strong>{total}</strong>
+                </span>
                 <div className="pagination-buttons">
-                  <button disabled={page === 1} onClick={() => setPage(p => p - 1)}>Назад</button>
-                  <span style={{ padding: '6px 12px', fontSize: '13px' }}>{page} из {totalPages || 1}</span>
-                  <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Вперед</button>
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Назад
+                  </button>
+                  <span style={{ padding: "6px 12px", fontSize: "13px" }}>
+                    {page} из {totalPages || 1}
+                  </span>
+                  <button
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Вперед
+                  </button>
                 </div>
               </div>
             </div>
